@@ -1,10 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
 #parameters
 alpha = 10
 N = 3
-q = 1
+m = 1
 dims = 2*N + 1
 hbar = 1
+k_l = 2 * np.pi / 829
+
 def H_builder(alpha, N, q, hbar, k_l, m):
     E_r = (hbar**2)*(k_l**2)/(2*m)
     V_0 = alpha*E_r
@@ -18,11 +21,22 @@ def H_builder(alpha, N, q, hbar, k_l, m):
     np.fill_diagonal(H[:,1:], offset_diag)
     return H
 
-def compute_eigenvectors(alpha, N, q, hbar, k_l, m):
-    H = H_builder(alpha, N, q, hbar, k_l, m)
-    eigenvalues, eigenvectors = np.linalg.eigh(H)
-    return eigenvalues, eigenvectors
+q_vals = np.linspace(-hbar*k_l, hbar*k_l, 200)
+energy_bands = np.zeros((len(q_vals), 2*N+1))
 
-# Example usage:
-# k_l and m need to be defined before calling this function.
-# eigenvalues, eigenvectors = compute_eigenvectors(alpha, N, q, hbar, k_l, m)
+for i, q in enumerate(q_vals):
+    H = H_builder(alpha, N, q, hbar, k_l, m)
+    eigenvalues = np.linalg.eigh(H)[0]
+    energy_bands[i, :] = eigenvalues  
+
+print(energy_bands)
+#Plotting the energy bands
+for band in range(2 * N + 1):
+    plt.plot(q_vals, energy_bands[:, band], label=f'Band {band + 1}')
+
+plt.xlabel('q (Momentum)')
+plt.ylabel('Energy')
+plt.title('Energy Bands in the First Brillouin Zone')
+plt.legend()
+plt.show()
+
