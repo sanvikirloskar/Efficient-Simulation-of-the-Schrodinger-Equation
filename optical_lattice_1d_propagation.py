@@ -31,7 +31,27 @@ from quevolutio.core.tdse import TDSE, Controls, Hamiltonian
 from quevolutio.propagators.semi_global import ApproximationBasis, SemiGlobal
 
 ## NOTE: SIMULATION SET UP -----------------------------------------------------
+#parameters
+alpha = 10
+N = 10
+m = 1
+dims = 2*N + 1
+hbar = 1
+k_l = 1
+q = 0
 
+def bloch_hamiltonian(alpha, N, q, hbar, k_l, m):
+    E_r = (hbar**2)*(k_l**2)/(2*m)
+    V_0 = alpha*E_r
+    main_diag = np.zeros(dims)
+    for i in range(-N,N+1):
+        main_diag[i+N] = (((2*i+q)/hbar*k_l)**2*E_r)
+    offset_diag = np.full(dims-1, V_0/4)
+    H = np.zeros((dims,dims), dtype= float)
+    np.fill_diagonal(H, main_diag)
+    np.fill_diagonal(H[1:], offset_diag)
+    np.fill_diagonal(H[:,1:], offset_diag)
+    return H
 
 class DHOConstants(QuantumConstants):
     """
@@ -50,8 +70,7 @@ class DHOConstants(QuantumConstants):
 
     hbar: float = 1.0
     mass: float = 1.0
-    omega: float = 1.0
-    v0: float = 1.0
+    v0: float = 5.0
     kl: float = 1.0
 
 class OpticalLatticeHamiltonian(Hamiltonian):
@@ -185,40 +204,43 @@ def main():
     constants: DHOConstants = DHOConstants()
     domain: QuantumHilbertSpace = QuantumHilbertSpace(
         num_dimensions=1,
-        num_points=np.array([512]),
+        num_points=np.array([201]),
         position_bounds=np.array([[-10.0, 10.0]]),
         constants=constants,
     )
 
     # Set up the initial state.
-    # Here we use the eigenstates of the exact Hamiltonian (T = 0.00).
-    h_matrix: CSRMatrix = sho.hamiltonian_matrix(
-        domain, constants.mass, [constants.omega]
-    )
+    h_matrix: CSRMatrix = bloch_hamiltonian(alpha, N, q, hbar, k_l, m)
     eigenvalues, eigenvectors = eigsh(h_matrix, k=5, which="SA")
+
+    # Here we use the eigenstates of the exact Hamiltonian (T = 0.00).
+    # h_matrix: CSRMatrix = sho.hamiltonian_matrix(
+    #     domain, constants.mass, [constants.omega]
+    # )
+    # eigenvalues, eigenvectors = eigsh(h_matrix, k=5, which="SA")
 
     state_idx: int = 0
     state_initial: RVector = cast(
         RVector, domain.normalise_state(eigenvectors[:, state_idx])
     )
 
-    # Store the minimum and maximum eigenvalues, accounting for the driving term.
-    driving_term: CSRMatrix = cast(
-        CSRMatrix, sp.diags(domain.position_axes[0], format="csr")
-    )
+    # # Store the minimum and maximum eigenvalues, accounting for the driving term.
+    # driving_term: CSRMatrix = cast(
+    #     CSRMatrix, sp.diags(domain.position_axes[0], format="csr")
+    # )
 
-    # Account for the minimum driving term and restore.
-    h_matrix += -driving_term
+    # # Account for the minimum driving term and restore.
+    # h_matrix += -driving_term
     eigenvalue_min = eigsh(h_matrix, k=1, which="SA")[0][0]
-    h_matrix -= -driving_term
+    # h_matrix -= -driving_term
 
-    # Account for the maximum driving term and restore.
-    h_matrix += driving_term
+    # # Account for the maximum driving term and restore.
+    # h_matrix += driving_term
     eigenvalue_max = eigsh(h_matrix, k=1, which="LA")[0][0]
-    h_matrix -= driving_term
+    # h_matrix -= driving_term
 
     # Set up the TDSE.
-    hamiltonian: DHOHamiltonian = DHOHamiltonian(domain, eigenvalue_min, eigenvalue_max)
+    hamiltonian: OpticalLatticeHamiltonian = OpticalLatticeHamiltonian(domain, eigenvalue_min, eigenvalue_max)
     tdse: TDSE = TDSE(domain, hamiltonian)
 
     # Set up the time domain.
@@ -238,7 +260,7 @@ def main():
     print("Propagation Start")
     start_time: float = time.time()
     states: CTensors = propagator.propagate(
-        state_initial, controls_fn, diagnostics=True
+        state_initial, diagnostics=True
     )
     final_time: float = time.time()
     print("Propagation Done")
@@ -256,20 +278,20 @@ def main():
         ),
     )
 
-    # Calculate the error from the exact position expectation values.
-    exact_expectation: RVector = 0.5 * (
-        (time_domain.time_axis * np.cos(time_domain.time_axis))
-        - np.sin(time_domain.time_axis)
-    )
-    errors: RVector = np.abs(exact_expectation - states_expectation)
+    # # Calculate the error from the exact position expectation values.
+    # exact_expectation: RVector = 0.5 * (
+    #     (time_domain.time_axis * np.cos(time_domain.time_axis))
+    #     - np.sin(time_domain.time_axis)
+    # )
+    # errors: RVector = np.abs(exact_expectation - states_expectation)
 
-    # Print simulation information.
-    print(f"Runtime \t\t: {(final_time - start_time):.5f} seconds")
-    print(f"Max Error \t\t: {np.max(errors):.5e}")
-    print(f"Max Norm Deviation \t: {np.max(np.abs(norms - norms[0])):.5e}")
+    # # Print simulation information.
+    # print(f"Runtime \t\t: {(final_time - start_time):.5f} seconds")
+    # print(f"Max Error \t\t: {np.max(errors):.5e}")
+    # print(f"Max Norm Deviation \t: {np.max(np.abs(norms - norms[0])):.5e}")
 
     # Set a common filename.
-    filename: str = "driven_ho_1d_testing"
+    filename: str = "optical_lattice_1d_testing_n100"
 
     # Create directories for saving data if they do not exist.
     for folder in (Path("data"), Path("figures"), Path("anims")):
