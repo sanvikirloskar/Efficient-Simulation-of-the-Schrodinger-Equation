@@ -45,7 +45,7 @@ def bloch_hamiltonian(alpha, N, q, hbar, k_l, m):
     V_0 = alpha*E_r
     main_diag = np.zeros(dims)
     for i in range(-N,N+1):
-        main_diag[i+N] = (((2*i+q)/hbar*k_l)**2*E_r)
+        main_diag[i+N] = (((2*i+q)/(hbar*k_l))**2*E_r)
     offset_diag = np.full(dims-1, V_0/4)
     H = np.zeros((dims,dims), dtype= float)
     np.fill_diagonal(H, main_diag)
@@ -204,7 +204,7 @@ def main():
     constants: DHOConstants = DHOConstants()
     domain: QuantumHilbertSpace = QuantumHilbertSpace(
         num_dimensions=1,
-        num_points=np.array([201]),
+        num_points=np.array([21]),
         position_bounds=np.array([[-10.0, 10.0]]),
         constants=constants,
     )
