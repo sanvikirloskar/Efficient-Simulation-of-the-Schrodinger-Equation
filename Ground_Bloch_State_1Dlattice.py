@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 #parameters
 alpha = 10
 N = 10
-m = 1
+m = 1 
 dims = 2*N + 1
 hbar = 1
 k_l = 1
