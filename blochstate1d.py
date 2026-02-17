@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from QuEvolutio.quevolutio.core.domain import QuantumConstants
-
 class OLConstants(QuantumConstants):
     """
     Represents the constants of an optical lattice system in natural
@@ -13,21 +12,34 @@ class OLConstants(QuantumConstants):
         The reduced Planck constant.
     mass : float
         The mass of the system.
-    v0 : float
-        The potential of the lattice
     kl : float
-        The wavevector of the lattice
+        The wavevector of the lattice.
     alpha : float
-        The lattice depth parameter
+        The lattice depth parameter.
     q : float
-        The quasimomentum
+        The quasimomentum.
     band : int
-        The band index
+        The band index.
     N : int
-    unit_cell : float
-        The size of the unit cell.
+        Truncated basis of fourier series for creating bloch states.
     num_points : int
         The number of spatial discretisation points.
+    N_basis : int
+        Number of basis functions in the CRAB shaking function.
+    n_p : int
+        Number of momentum states to consider in the momentum population calculation.
+    unit_cell : float
+        The size of the unit cell.
+    lower_x_bound : float
+        Lower bound of the position grid.
+    upper_x_bound : float
+        Upper bound of the position grid.
+    dims: int
+        Dimension of Hamiltonian matrix for creating bloch states.
+    E_r : float
+        Lattice recoil energy.
+    v0 : float
+        The potential of the lattice.
     """
 
     hbar: float = 1.0
@@ -38,6 +50,8 @@ class OLConstants(QuantumConstants):
     band: int = 0
     N: int = 10
     num_pts: int = 300
+    N_basis: int = 10
+    n_p = 11 # -10hbark to +10hbark
     @property
     def unit_cell(self):
         return np.pi / self.kl
@@ -58,6 +72,14 @@ class OLConstants(QuantumConstants):
     @property
     def v0(self):
         return self.alpha * self.E_r 
+    
+    @property
+    #split state
+    def desired_mom_pop(self):
+            mom_pop_des = np.zeros(11) 
+            mom_pop_des[4] = 0.5 
+            mom_pop_des[6] = 0.5
+            return mom_pop_des
 
 class GroundBlochState():
 
