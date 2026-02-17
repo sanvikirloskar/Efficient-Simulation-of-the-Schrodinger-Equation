@@ -34,14 +34,19 @@ class OLConstants(QuantumConstants):
     mass: float = 1.0
     kl: float = 1.0
     alpha: float = 10.0
-    q: float = 0.0
+    q: float = 0
     band: int = 0
     N: int = 10
-    num_pts: int = 150
+    num_pts: int = 300
     @property
     def unit_cell(self):
         return np.pi / self.kl
-    
+    @property
+    def lower_x_bound(self):
+        return - self.unit_cell
+    @property
+    def upper_x_bound(self):
+        return self.unit_cell
     @property
     def dims(self):
         return 2 * self.N + 1
@@ -51,7 +56,7 @@ class OLConstants(QuantumConstants):
         return ((self.hbar **2) * (self.kl **2)) / (2 * self.mass)
 
     @property
-    def V0(self):
+    def v0(self):
         return self.alpha * self.E_r 
 
 class GroundBlochState():
@@ -59,12 +64,12 @@ class GroundBlochState():
     def __init__(self):
         self.c = OLConstants()
         self.H = self.H_builder()
-        self.x_grid = np.linspace(-self.c.unit_cell, self.c.unit_cell, self.c.num_pts)
+        self.x_grid = np.linspace(self.c.lower_x_bound, self.c.upper_x_bound, self.c.num_pts)
     def H_builder(self):
         main_diag = np.zeros(self.c.dims)
         for i in range(-self.c.N, self.c.N + 1):
             main_diag[i + self.c.N] = (((2*i + self.c.q) / (self.c.hbar * self.c.kl))**2 * self.c.E_r)
-        offset_diag = np.full(self.c.dims-1, -self.c.V0 / 4)
+        offset_diag = np.full(self.c.dims-1, -self.c.v0 / 4)
         H = np.zeros((self.c.dims, self.c.dims), dtype= float)
         np.fill_diagonal(H, main_diag)
         np.fill_diagonal(H[1:], offset_diag)
@@ -80,6 +85,9 @@ class GroundBlochState():
         psi1d = np.exp(1j * self.c.q * self.x_grid) * u
         psi1d_real = np.real(psi1d)
         psi1d_real /= np.max(np.abs(psi1d_real))
+        idx = len(self.x_grid)//2   # x ≈ 0
+        if np.real(psi1d_real[idx]) < 0:
+            psi1d_real *= -1
         if spacial_dims == 1:
             return psi1d_real
         if spacial_dims == 2:
