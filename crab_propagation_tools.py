@@ -80,12 +80,12 @@ class OpticalLatticeHamiltonian(HamiltonianSeparable):
 
         return (pe_diag,)
 
-def make_controls_fn(N_basis, coeffs, omegas, T):
+def make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, T):
     def controls_fn(time: float) -> Controls:
         crab_function = 0
         for k in range(N_basis // 2):
-            crab_function += coeffs[k] * np.cos(omegas[k] * time) #selects the first half of the coefficients for the cosine terms
-            crab_function += coeffs[k + N_basis // 2] * np.sin(omegas[k] * time) #selects the second half of the coefficients for the sine terms
+            crab_function += A_coeffs[k] * np.cos(omegas[k] * time) #selects the first half of the coefficients for the cosine terms
+            crab_function += B_coeffs[k] * np.sin(omegas[k] * time) #selects the second half of the coefficients for the sine terms
         envelope =  (np.sin( (np.pi * time) / T))**2
         phi = (1 + crab_function) * envelope
         return phi

@@ -66,7 +66,7 @@ def dot_product_error(mom_pop, mom_pop_des):
     return error
 
 
-def get_error(coeffs, omegas, N_basis, mom_pop_des = OLConstants().desired_mom_pop):
+def get_error(A_coeffs, B_coeffs, omegas, N_basis, mom_pop_des = OLConstants().desired_mom_pop):
     '''
     This function gets the error from the desired momentum population for propagating a state with a given 
     shaking function in the CRAB basis.
@@ -103,17 +103,19 @@ def get_error(coeffs, omegas, N_basis, mom_pop_des = OLConstants().desired_mom_p
     propagator = SplitOperator(hamiltonian, time_domain)
 
     # Make the shaking function (controls function), for the given coefficients and frequencies
-    controls_fn = make_controls_fn(N_basis, coeffs, omegas, time_domain.time_max)
+    controls_fn = make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, time_domain.time_max)
 
     # 2. Propagate the initial state (timed).
 
     print("Propagation Start")
     start_time: float = time.time()
     states: CTensors = propagator.propagate(
-        state_initial, controls_fn, diagnostics=True
+        state_initial, controls_fn, diagnostics=False
     )
     final_time: float = time.time()
     print("Propagation Done")
+    runtime = final_time - start_time
+    # print(f"Runtime: {runtime:.2f} seconds")
     final_state = states[-1]
 
     # # 3. Find momentum space population
@@ -126,20 +128,21 @@ def get_error(coeffs, omegas, N_basis, mom_pop_des = OLConstants().desired_mom_p
 
     return error
 
-# 1. Testing the error function with no shaking
-omegas1 = np.zeros(OLConstants().N_basis // 2)
-coeffs1 = np.array([-0.2, -0.2, -0.2, -0.2, -0.2, 1, 2, 3, 4, 5])
+# # 1. Testing the error function with no shaking
+# omegas1 = np.zeros(OLConstants().N_basis // 2)
+# coeffs1 = np.array([-0.2, -0.2, -0.2, -0.2, -0.2, 1, 2, 3, 4, 5])
 
-bloch_state_position_space = GroundBlochState().generate_bloch_state()
-x_grid_spacing = GroundBlochState().x_grid[1] - GroundBlochState().x_grid[0]
-desired_mom_pop1 = momentum_space_population(bloch_state_position_space, x_grid_spacing)
-#Get error from the ground bloch state
-error1 = get_error(coeffs1, omegas1, OLConstants().N_basis, mom_pop_des=desired_mom_pop1)
+# bloch_state_position_space = GroundBlochState().generate_bloch_state()
+# x_grid_spacing = GroundBlochState().x_grid[1] - GroundBlochState().x_grid[0]
+# # desired_mom_pop1 = momentum_space_population(bloch_state_position_space, x_grid_spacing)
+# #Get error from the ground bloch state
+# error1 = get_error(coeffs1, omegas1, OLConstants().N_basis)
 
-# 2. Testing the error function with shaking
-omegas2 = np.random.uniform(0, 2*np.pi, OLConstants().N_basis // 2)
-coeffs2 = np.random.uniform(-1, 1, OLConstants().N_basis)
-error2 = get_error(coeffs2, omegas2, OLConstants().N_basis)
+# # 2. Testing the error function with shaking
 
-print(error1)
-print(error2)
+# omegas2 = np.random.uniform(0, 2*np.pi, OLConstants().N_basis // 2)
+# coeffs2 = np.random.uniform(-1, 1, OLConstants().N_basis)
+# error2 = get_error(coeffs2, omegas2, OLConstants().N_basis)
+
+# print(error1)
+# print(error2)
