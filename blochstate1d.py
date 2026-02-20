@@ -28,6 +28,8 @@ class OLConstants(QuantumConstants):
         Number of basis functions in the CRAB shaking function.
     n_p : int
         Number of momentum states to consider in the momentum population calculation.
+    T: float
+        Total time of propagation
     unit_cell : float
         The size of the unit cell.
     lower_x_bound : float
@@ -52,6 +54,7 @@ class OLConstants(QuantumConstants):
     num_pts: int = 300
     N_basis: int = 10
     n_p = 11 # -10hbark to +10hbark
+    T = 10.0
     @property
     def unit_cell(self):
         return np.pi / self.kl

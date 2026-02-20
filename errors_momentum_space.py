@@ -97,13 +97,13 @@ def get_error(A_coeffs, B_coeffs, omegas, N_basis, mom_pop_des = OLConstants().d
     hamiltonian: OpticalLatticeHamiltonian = OpticalLatticeHamiltonian(domain)
 
     # Set up the time domain.
-    time_domain: TimeGrid = TimeGrid(time_min=0.0, time_max=10.0, num_points=10001)
+    time_domain: TimeGrid = TimeGrid(time_min=0.0, time_max=constants.T, num_points=10001)
 
     # Set up the propagator.
     propagator = SplitOperator(hamiltonian, time_domain)
 
     # Make the shaking function (controls function), for the given coefficients and frequencies
-    controls_fn = make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, time_domain.time_max)
+    controls_fn = make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, constants.T)
 
     # 2. Propagate the initial state (timed).
 
