@@ -106,14 +106,11 @@ def get_error(A_coeffs, B_coeffs, omegas, N_basis, mom_pop_des = OLConstants().d
     controls_fn = make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, constants.T)
 
     # 2. Propagate the initial state (timed).
-
-    print("Propagation Start")
     start_time: float = time.time()
     states: CTensors = propagator.propagate(
         state_initial, controls_fn, diagnostics=False
     )
     final_time: float = time.time()
-    print("Propagation Done")
     runtime = final_time - start_time
     # print(f"Runtime: {runtime:.2f} seconds")
     final_state = states[-1]
