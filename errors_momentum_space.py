@@ -66,7 +66,7 @@ def dot_product_error(mom_pop, mom_pop_des):
     return error
 
 
-def get_error(A_coeffs, B_coeffs, omegas, N_basis, mom_pop_des = OLConstants().desired_mom_pop):
+def get_error(A_coeffs, B_coeffs, omegas, N_basis, base_pulse, mom_pop_des = OLConstants().desired_mom_pop):
     '''
     This function gets the error from the desired momentum population for propagating a state with a given 
     shaking function in the CRAB basis.
@@ -103,7 +103,7 @@ def get_error(A_coeffs, B_coeffs, omegas, N_basis, mom_pop_des = OLConstants().d
     propagator = SplitOperator(hamiltonian, time_domain)
 
     # Make the shaking function (controls function), for the given coefficients and frequencies
-    controls_fn = make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, constants.T)
+    controls_fn = make_controls_fn(N_basis, A_coeffs, B_coeffs, omegas, constants.T, base_pulse)
 
     # 2. Propagate the initial state (timed).
     start_time: float = time.time()

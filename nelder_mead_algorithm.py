@@ -28,7 +28,7 @@ def sort_errors(errors, A, B):
     sorted_B = B[:, sorted_indices]
     return sorted_errors, sorted_A, sorted_B
 
-def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w):
+def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w, base_pulse):
     """
     Performs one interation of the Nelder-Mead algorithm, following the steps on the Wikipedia page.
 
@@ -76,7 +76,7 @@ def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w):
     refl_B = centroid_B + refl_coeff * (centroid_B - worst_B)
 
     # Get error for reflected point
-    refl_err = get_error(refl_A, refl_B, omegas, N_basis)
+    refl_err = get_error(refl_A, refl_B, omegas, N_basis, base_pulse)
     N_calls += 1
     #check the conditions for the reflected point
 
@@ -90,7 +90,7 @@ def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w):
     elif refl_err < best_err:
         exp_A = centroid_A + exp_coeff * (refl_A - centroid_A)
         exp_B = centroid_B + exp_coeff * (refl_B - centroid_B)
-        exp_err = get_error(exp_A, exp_B, omegas, N_basis)
+        exp_err = get_error(exp_A, exp_B, omegas, N_basis, base_pulse)
         N_calls += 1
         #If the expanded point is better than the reflected point, replace the worst point with the expanded point
         if exp_err < refl_err:
@@ -109,7 +109,7 @@ def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w):
         if refl_err < worst_err:
             cont_A = centroid_A + cont_coeff * (refl_A - centroid_A)
             cont_B = centroid_B + cont_coeff * (refl_B - centroid_B)
-            cont_err = get_error(cont_A, cont_B, omegas, N_basis)
+            cont_err = get_error(cont_A, cont_B, omegas, N_basis, base_pulse)
             N_calls += 1
             # If the contracted point is better than the reflected point, replace the worst point with the contracted point
             if cont_err < refl_err:
@@ -123,7 +123,7 @@ def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w):
         else:
             cont_A = centroid_A + cont_coeff * (worst_A - centroid_A)
             cont_B = centroid_B + cont_coeff * (worst_B - centroid_B)
-            cont_err = get_error(cont_A, cont_B, omegas, N_basis)
+            cont_err = get_error(cont_A, cont_B, omegas, N_basis, base_pulse)
             N_calls += 1
             # If the contracted point is better than the worst point, replace the worst point with the contracted point
             if cont_err < worst_err:
@@ -147,7 +147,7 @@ def nelder_mead(sorted_errs, sorted_A, sorted_B, N_basis, omegas, n_c, n_w):
         optimised_B = shrink_B
         optimised_errs = np.zeros(n_c)
         for i in range(n_c):
-            optimised_errs[i] = get_error(optimised_A[:,i], optimised_B[:,i], omegas, N_basis)
+            optimised_errs[i] = get_error(optimised_A[:,i], optimised_B[:,i], omegas, N_basis, base_pulse)
             N_calls += 1
     
     else:
