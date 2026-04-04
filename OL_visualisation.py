@@ -99,12 +99,13 @@ def plot_state_1D(
     )
 
     # Set the axis labels.
-    ax.set_title(title)
-    ax.set_xlabel(r"$x$")
+    ax.set_title(title, fontsize =30)
+    ax.set_xlabel(r"$x$", fontsize=35)
     ax.set_ylabel(
-        r"$|\psi(x)|^{2}, \; \mathrm{{Re}}[\psi(x)], \; \mathrm{{Im}}[\psi(x)]$"
+        r"$|\psi(x)|^{2}, \; \mathrm{{Re}}[\psi(x)], \; \mathrm{{Im}}[\psi(x)]$",
+        fontsize=27
     )
-    ax.legend(loc="upper right")
+    ax.legend(loc="upper right", fontsize=20)
 
     # Save the figure.
     fig.savefig(filename, dpi=300, bbox_inches="tight")
@@ -148,9 +149,9 @@ def plot_state_2D(
     fig.colorbar(heatmap, ax=ax, label=r"$|\psi(x_{1}, x_{2})|^{2}$")
 
     # Set the axis labels.
-    ax.set_title(title)
-    ax.set_xlabel(r"$x_{1}$")
-    ax.set_ylabel(r"$x_{2}$")
+    ax.set_title(title, fontsize=30)
+    ax.set_xlabel(r"$x_{1}$", fontsize=24)
+    ax.set_ylabel(r"$x_{2}$", fontsize=24)
 
     # Save the figure.
     fig.savefig(filename, dpi=300, bbox_inches="tight")
@@ -233,10 +234,10 @@ def animate_states_1D(
     )
 
     # Set the labels.
-    title = ax.set_title(r"$\text{State} \; (T = 0.00)$")
-    ax.set_xlabel(r"$x$")
+    title = ax.set_title(r"$\text{State} \; (T = 0.00)$", fontsize =20)
+    ax.set_xlabel(r"$x$", fontsize=18)
     ax.set_ylabel(
-        r"$|\psi(x)|^{2}, \; \mathrm{{Re}}[\psi(x)], \; \mathrm{{Im}}[\psi(x)]$"
+        r"$|\psi(x)|^{2}, \; \mathrm{{Re}}[\psi(x)], \; \mathrm{{Im}}[\psi(x)]$", fontsize=18
     )
     ax.legend(loc="upper right")
 
