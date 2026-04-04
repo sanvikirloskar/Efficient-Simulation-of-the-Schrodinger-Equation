@@ -21,12 +21,10 @@ def fitness_error(mom_pop, mom_pop_des):
 
     Internal Attributes
     --------------------
-    n = 10 should be the length of the momentum grid
     delete_n = indexes in the momentum grid of the desired state
     """
     
     first_term = np.abs(np.sum(mom_pop_des - mom_pop))
-    n = 10
     delete1 = [4]
     delete2 = [6]
     
@@ -96,7 +94,7 @@ def fitness_finder(A_coeffs, B_coeffs, omegas, mom_pop_des):
     return fitnesses, mom_pop
 
 
-def sorted_fitnesses(fitnesses, A_coeffs, B_coeffs):
+def sorted_fitnesses(fitnesses, A_coeffs, B_coeffs, omegas):
     """"
     Returns the sorted fitnesses and their corresponding Aand B coefficients. 
     This is used to select the best individuals for the next generation.
@@ -105,4 +103,5 @@ def sorted_fitnesses(fitnesses, A_coeffs, B_coeffs):
     sorted_fits = fitnesses[idx]
     sorted_A_coeffs = A_coeffs[idx]
     sorted_B_coeffs = B_coeffs[idx]
-    return sorted_fits, sorted_A_coeffs, sorted_B_coeffs
+    sorted_omegas = omegas[idx]
+    return sorted_fits, sorted_A_coeffs, sorted_B_coeffs, sorted_omegas
