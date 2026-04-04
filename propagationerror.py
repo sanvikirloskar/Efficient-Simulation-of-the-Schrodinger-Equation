@@ -1,6 +1,6 @@
 from Optical_Lattice_Splitoperator import make_controls_fn
 from blochstate1d import OLConstants, GroundBlochState
-from errors_momentum_space import momentum_space_population, dot_product_error
+from errors_momentum_space import momentum_space_population, dot_product_error, momentum_space_populationnew
 from crab_propagation_tools import OpticalLatticeHamiltonian
 import numpy as np
 import time
@@ -24,6 +24,7 @@ from QuEvolutio.quevolutio.core.aliases import (  # isort: skip
 from QuEvolutio.quevolutio.core.domain import QuantumConstants, QuantumHilbertSpace, TimeGrid
 from QuEvolutio.quevolutio.core.tdse import TDSE, Controls, Hamiltonian
 from QuEvolutio.quevolutio.propagators.semi_global import ApproximationBasis, SemiGlobal
+import matplotlib.pyplot as plt
 class OpticalLatticeHamiltonianSG(Hamiltonian):
     time_dependent: bool = False
     ke_time_dependent: bool = False
@@ -142,9 +143,17 @@ def controls_fn(time: float):
     """
 
     return time
+
+def make_controls_fn(omega):
+    def controls_fn(time: float) -> Controls:
+        phi = np.sin(omega * time)
+        return phi 
+    return controls_fn
+
 initial_state = GroundBlochState().generate_bloch_state()
 x_grid_spacing = GroundBlochState().x_grid[1] - GroundBlochState().x_grid[0]
-des_mom_pop = momentum_space_population(initial_state, x_grid_spacing)
+
+# des_mom_pop = momentum_space_population(initial_state, x_grid_spacing)
 constants: OLConstants = OLConstants()
 domain: QuantumHilbertSpace = QuantumHilbertSpace(
         num_dimensions=1,
@@ -156,59 +165,82 @@ state_initial: RVector = cast(
         RVector, domain.normalise_state(initial_state)
     )
 
-
 hamiltonian: OpticalLatticeHamiltonian = OpticalLatticeHamiltonian(domain)
 
-time_domain: TimeGrid = TimeGrid(time_min=0.0, time_max=constants.T, num_points=10001)
+omegas_list = [0, 1, 2, 5, 10, 20, 50, 100]
 
+all_dt = {}
+all_errors = {}
 
-propagator = SplitOperator(hamiltonian, time_domain)
+for omega in omegas_list:
 
-start_time: float = time.time()
-states: CTensors = propagator.propagate(
-        state_initial, controls_fn, diagnostics=False
+    dt_list = []
+    errors_split = []
+
+    # --- reference solution for this omega ---
+    controls_fn = make_controls_fn(omega)
+    time_domain_ref: TimeGrid = TimeGrid(time_min=0.0, time_max=constants.T, num_points=512000)
+
+    propagator = SplitOperator(hamiltonian, time_domain_ref)
+
+    states_ref = propagator.propagate(state_initial, controls_fn, diagnostics=False)
+    psi_ref = states_ref[-1]
+    ref_mom = momentum_space_population(psi_ref, x_grid_spacing)
+
+    for num_steps in num_steps_list:
+
+        # Time grid
+        time_domain = TimeGrid(
+            time_min=0.0,
+            time_max=constants.T,
+            num_points=num_steps
+        )
+
+        dt = constants.T / (num_steps - 1)
+        dt_list.append(dt)
+
+        # Propagate
+        propagator = SplitOperator(hamiltonian, time_domain)
+
+        states = propagator.propagate(
+            state_initial, controls_fn, diagnostics=False
+        )
+
+        final_state = states[-1]
+        final_mom_pop = momentum_space_population(final_state, x_grid_spacing)
+
+        error = dot_product_error(final_mom_pop, ref_mom)
+        errors_split.append(error)
+
+    # Store results
+    all_dt[omega] = dt_list
+    all_errors[omega] = errors_split
+
+for omega in omegas_list:
+    data = np.column_stack((all_dt[omega], all_errors[omega]))
+
+    filename = f"error_vs_dt_omega_{omega:.2f}.txt"
+
+    np.savetxt(
+        filename,
+        data,
+        header="dt error",
+        comments=""
     )
-final_time: float = time.time()
-runtime = final_time - start_time
 
-final_state = states[-1]
-final_mom_pop = momentum_space_population(final_state, x_grid_spacing)
-error = dot_product_error(final_mom_pop, des_mom_pop)
-print(f"Error from desired momentum population: {error:.5f}%")
+plt.figure()
 
-#Semi global error
+for omega in omegas_list:
+    plt.loglog(
+        all_dt[omega],
+        all_errors[omega],
+        marker='o',
+        label=f'ω = {omega:.2f}'
+    )
 
-state_initial: RVector = cast(
-        RVector, domain.normalise_state(initial_state))
-groundblochstatesg = GroundBlochState()
-hamiltonianSG = groundblochstatesg.H
-eigenvalues, eigenvectors = np.linalg.eigh(hamiltonianSG)
-eigenvalue_min = np.min(eigenvalues)
-eigenvalue_max = np.max(eigenvalues)
+plt.xlabel('Time step')
+plt.ylabel('Percentage error from reference solution')
+plt.legend()
+plt.grid(True, which="both", ls="--")
 
-#Set up TDSE
-hamiltonian: OpticalLatticeHamiltonianSG = OpticalLatticeHamiltonianSG(domain, eigenvalue_min, eigenvalue_max)
-
-tdse: TDSE = TDSE(domain, hamiltonian)
-
-#Set up time grid
-time_domain: TimeGrid = TimeGrid(time_min=0.0, time_max=10.0, num_points=10001)
-propagator = SemiGlobal(
-tdse,
-time_domain,
-order_m=10,
-order_k=10,
-tolerance=1e-5,
-approximation=ApproximationBasis.NEWTONIAN,
-)
-    # Propagate the state.
-
-start_time: float = time.time()
-states: CTensors = propagator.propagate(
-    state_initial, diagnostics=False
-)
-final_time: float = time.time()
-final_state_sg = states[-1]
-final_mom_pop_sg = momentum_space_population(final_state_sg, x_grid_spacing)
-error_sg = dot_product_error(final_mom_pop_sg, des_mom_pop)
-print(f"Error from desired momentum population: {error_sg:.5f}%")
+plt.show()
