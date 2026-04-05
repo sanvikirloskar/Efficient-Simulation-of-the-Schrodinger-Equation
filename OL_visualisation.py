@@ -4,6 +4,10 @@ Plotting functions for visualising simulations.
 NOTE: This is the exact code in QuEvolutio utils.visualisation, with font sizes changed for figures. It is included here as the 
 file name was changed to avoid confusion when running simulations in this project. The original file can be found in the QuEvolutio repository:
 https://github.com/Pavan365/QuEvolutio/tree/main/examples/utils
+
+In the 2D plot, aside from font and colour scheme chances, I have also added a contour overlay of the lattice potential to make it easier to visualise the lattice structure.
+This contour overlay is not in QuEvolutio and requires the x and y grids and lattice potential
+
 """
 
 # Import external modules.
@@ -23,6 +27,16 @@ from quevolutio.core.aliases import (  # isort: skip
     GTensors,
 )
 from quevolutio.core.domain import QuantumHilbertSpace, TimeGrid
+
+#Import OL specific modules
+from blochstate1d_NEW import OLConstants, GroundBlochState
+
+#Make the x and y grids and lattice potential for the contour overlay
+x_grid = GroundBlochState().x_grid
+y_grid = np.linspace(-OLConstants().unit_cell, OLConstants().unit_cell, OLConstants().num_pts)
+cos_x = np.cos(2 * OLConstants().kl * x_grid)
+cos_y = np.cos(2 * OLConstants().kl * y_grid)
+lattice_potential = -cos_x[:, None] - cos_y[None, :]
 
 # Matplotlib settings.
 mpl.rcParams["font.family"] = "Lato"
@@ -144,14 +158,23 @@ def plot_state_2D(
         domain.position_axes[1],
         prob_density.T,
         shading="auto",
-        cmap="viridis",
+        cmap="inferno",
     )
-    fig.colorbar(heatmap, ax=ax, label=r"$|\psi(x_{1}, x_{2})|^{2}$")
+    cbar = fig.colorbar(heatmap, ax=ax)
+    cbar.set_label(r"$|\psi(x_{1}, x_{2})|^{2}$", fontsize=27)
+    
+    #Plot the contour overlay
+    plt.contour(
+    x_grid, y_grid, lattice_potential,
+    levels=15,
+    colors='white',
+    linewidths=0.8
+    )
 
     # Set the axis labels.
     ax.set_title(title, fontsize=30)
-    ax.set_xlabel(r"$x_{1}$", fontsize=24)
-    ax.set_ylabel(r"$x_{2}$", fontsize=24)
+    ax.set_xlabel(r"$x_{1}$", fontsize=35)
+    ax.set_ylabel(r"$x_{2}$", fontsize=35)
 
     # Save the figure.
     fig.savefig(filename, dpi=300, bbox_inches="tight")
