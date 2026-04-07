@@ -71,6 +71,20 @@ plt.xlabel('Momentum state ($\\hbar k$)')
 plt.xticks(momentum_idx)
 plt.ylabel('Relative momentum population')
 plt.grid(True, alpha=0.3)
+
+target_x = [-2, 2]
+target_height = [0.5, 0.5]
+
+plt.bar(
+    target_x,
+    target_height,
+    width=0.8,              # match your main bars visually
+    edgecolor='black',
+    facecolor='none',      # <-- makes them hollow
+    linewidth=2,        # optional: dashed outline
+    label='Target'
+)
+
 plt.tight_layout()
 plt.savefig('relative_momentum_population.pdf') 
 plt.show()
