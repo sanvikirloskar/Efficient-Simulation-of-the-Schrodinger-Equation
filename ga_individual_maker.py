@@ -81,14 +81,25 @@ class OpticalLatticeHamiltonian(HamiltonianSeparable):
 
         return (pe_diag,)
 
-def make_controls_fn(T,A, B, omega):
+def make_controls_fn1(T,A_coeffs, B_coeffs, omegas):
     """"
     What you want to do is take the a and b arrays, run a for loop outside conrols fn and call for each element inside the array
     """
     
+    #def controls_fn(time: float) -> Controls:
+       # crab_function = 0
+      ##  N_elements = OLConstants.N_elements
+       # for k in range(N_elements// 2):
+          #  crab_function += A_coeffs[k] * np.cos(omegas[k] * time) #selects the first half of the coefficients for the cosine terms
+          #  crab_function += B_coeffs[k] * np.sin(omegas[k] * time) #selects the second half of the coefficients for the sine terms
+       # envelope =  (np.sin( (np.pi * time) / (T)))**2
+      #  phi = (1 + crab_function) * envelope
+      #  return phi
+        
+   # return controls_fn
     def controls_fn(time: float) -> np.ndarray:
         # Compute the shaking values
-        ga_vals = A * np.cos(omega * time) + B * np.sin(omega * time)
+        ga_vals = A_coeffs * np.cos(omegas * time) + B_coeffs * np.sin(omegas * time)
         
         # Apply envelope
         envelope = (np.sin(np.pi * time / T))**2
@@ -97,5 +108,7 @@ def make_controls_fn(T,A, B, omega):
         return phi
 
     return controls_fn
+
+   
    
 
