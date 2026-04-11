@@ -1,26 +1,14 @@
-"""
-Example simulation of a standard harmonic oscillator in two dimensions (2D)
-using the Split-Operator propagation scheme.
-"""
 
-# Import standard modules.
 import gc
 import sys
 import time
 from pathlib import Path
 from typing import Optional, Sequence, cast
-
-# Import external modules.
 import numpy as np
 from scipy.sparse.linalg import eigsh
-
-# Import local modules.
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 import QuEvolutio.examples.utils.numerical as numerical
 import QuEvolutio.examples.utils.standard_ho as sho
 import QuEvolutio.examples.utils.visualisation as vis
-
-# Import QuEvolutio modules.
 from QuEvolutio.quevolutio.core.aliases import (  # isort: skip
     RVector,
     CVector,
@@ -178,6 +166,15 @@ def momentum_space_population_2d(psi_xy, dx, dy, num_x_pts, num_y_pts):
 
     return mom_pop
 
+def dot_product_error_2d(mom_pop, mom_pop_des):
+    dot_product = np.sum(mom_pop * mom_pop_des)
+
+    norm_mom_pop = np.linalg.norm(mom_pop)
+    norm_mom_pop_des = np.linalg.norm(mom_pop_des)
+
+    error = (1 - (dot_product / (norm_mom_pop * norm_mom_pop_des))) * 100
+    return error
+
 ## NOTE: SIMULATION SET UP END -------------------------------------------------
 
 
@@ -214,7 +211,7 @@ def main():
     hamiltonian: SHOHamiltonian = SHOHamiltonian(domain)
 
     # Set up the time domain.
-    time_domain: TimeGrid = TimeGrid(time_min=0.0, time_max=10.0, num_points=1001)
+    time_domain: TimeGrid = TimeGrid(time_min=0.0, time_max=10.0, num_points=1000)
 
     # Set up the propagator.
     propagator = SplitOperator(hamiltonian, time_domain)
@@ -234,6 +231,15 @@ def main():
     for folder in (Path("data"), Path("figures"), Path("anims")):
         folder.mkdir(parents=True, exist_ok=True)
 
+    # Calculate error from desired 2d state
+    mom_pop_des = np.zeros((constants.n_p, constants.n_p))
+    mid = constants.N_basis // 2
+    mom_pop_des[mid-1, mid-1] = 0.25  
+    mom_pop_des[mid-1, mid+1] = 0.25  
+    mom_pop_des[mid+1, mid-1] = 0.25  
+    mom_pop_des[mid+1, mid+1] = 0.25  
+
+    
     # # Save the propagated states.
     # np.save(f"data/{filename}.npy", states)
 
@@ -256,6 +262,9 @@ def main():
     final_state = states[-1]
     x_grid_spacing = GroundBlochState().x_grid[1] - GroundBlochState().x_grid[0]
     momentum_populations = momentum_space_population_2d(final_state, x_grid_spacing, x_grid_spacing, constants.num_pts, constants.num_pts)
+    error = dot_product_error_2d(momentum_populations, mom_pop_des)
+    print(f"Error from desired state: {error:.6f}%")
+
     orders = np.arange(-10, 12, 2)
     plt.rcParams['font.size'] = 16
     plt.imshow(momentum_populations, origin="lower", extent=[orders[0], orders[-1], orders[0], orders[-1]],
