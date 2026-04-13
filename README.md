@@ -3,7 +3,7 @@ The main branch contains important pieces of code e.g working lattices in each d
 Our respective branches have rough code that might not solve previous problems but acts as a record of the work which was done. Some of this code does not work.
 GitHub repository link: https://github.com/sanvikirloskar/Efficient-Simulation-of-the-Schrodinger-Equation
 
-Contents of Main branch:
+Contents of Main branch Code:
 --------------------------
 1. Cosine Potential.ipynb : Solved the TISE for the optical lattice. Produces the energy bands of the lattice
 2. 1D_SEMIGLOBAL_MAIN.ipynb: Clean simulation of the 1D TDSE of optical lattice. Uploaded version has no shaking but functions can be imported from crab_propagation_tools, crab_propagation_tools_semiglobal, or ga_individual_maker
@@ -19,4 +19,11 @@ Contents of Main branch:
 12. ga_individual_maker.py: Contains the code to make the individuals when given the basis elements - Fourier amplitudes + frequencies. A parametrised version of the code is in the comments of def make_controls_fn1, but is left as a comment as data was not produced with it. Also contains kinetic and potential terms for propagation methods as required by QuEvolutio. 
 13. ga_tools.py: Contains the fitness function, the fitness finder after propagating, and the sorting algorithm for each fitness
 14. genetic_algorithm.py: Contains the elitism functions, mutation,creep and crossover functions, and collates these + ga_tools to create a full_genetic_algorithm function
-15. NC_error_graphs: The graphs made for the report comparing errors in Newtonian/Chebyshev expansions, errors vs propagation time and errors vs number of Brillouin zones 
+15. NC_error_graphs: The graphs made for the report comparing errors in Newtonian/Chebyshev expansions, errors vs propagation time and errors vs number of Brillouin zones
+
+
+Data Included:
+--------------
+Semiglobal data:
+GA data: best fitnesses for all $r_m$ variations recorded, fitnesses for all $A_die$ variations recorded, example of a shaking function with fitness 0.11 (best_solution.npz)
+Nelder-Mead data:
