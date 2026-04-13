@@ -1,6 +1,6 @@
 Repository containing python code for the MSci Project
-The main branch contains important pieces of code e.g working lattices in each dimension.
-Our respective branches have rough code that might not solve previous problems but acts as a record of the work which was done. Some of this code does not work.
+The main branch contains important pieces of code e.g working lattices in each dimension. 
+Our respective branches have rough code that might not solve previous problems but acts as a record of the work which was done. Code in these branches may not work. 
 GitHub repository link: https://github.com/sanvikirloskar/Efficient-Simulation-of-the-Schrodinger-Equation
 \newline
 This project is dependent on QuEvolutio (P. Ponupureddi), link: https://github.com/Pavan365/QuEvolutio/tree/main
