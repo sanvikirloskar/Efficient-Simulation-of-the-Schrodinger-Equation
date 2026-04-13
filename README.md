@@ -32,5 +32,6 @@ Contents of Main branch Code:
 
 Data Included:
 --------------
+- Semi-global: optical_lattice_1d.npy, optical_lattice_2d.npy: contains the data used in OL_visualisation.py to make the graphs
 - GA data: best fitnesses for all $r_m$ variations recorded, fitnesses for all $A_{die}$ variations recorded, example of a shaking function with fitness 0.11 (best_solution.npz)
 - Nelder-Mead data: Contained in folders Nm_data and Nm_data2. Folders containing data from nm optimisation runs (in two folders as one is too big for github)
