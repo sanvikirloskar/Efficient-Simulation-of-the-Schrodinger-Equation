@@ -16,5 +16,7 @@ Contents of Main branch:
 9. ga_analysis.ipynb: Used to generate graphs for the shaking function, the 1D final state and splitting over time
 10. ga_full_sim.ipynb: The code where the full genetic algorithm was run, including test funcs, genetic algorithm and progression curve
 11. ga_graphs: The code where fitnesses from ga_full_sim were collated and put into graphs for the report
-12. ga_tools.py: Contains the fitness function, the fitness finder after propagating, and the sorting algorithm for each fitness
-13. genetic_algorithm.py: Contains the elitism functions, mutation,creep and crossover functions, and collates these + ga_tools to create a full_genetic_algorithm function 
+12. ga_individual_maker.py: Contains the code to make the individuals when given the basis elements - Fourier amplitudes + frequencies. A parametrised version of the code is in the comments of def make_controls_fn1, but is left as a comment as data was not produced with it. Also contains kinetic and potential terms for propagation methods as required by QuEvolutio. 
+13. ga_tools.py: Contains the fitness function, the fitness finder after propagating, and the sorting algorithm for each fitness
+14. genetic_algorithm.py: Contains the elitism functions, mutation,creep and crossover functions, and collates these + ga_tools to create a full_genetic_algorithm function
+15.NC_error_graphs: The graphs made for the report comparing errors in Newtonian/Chebyshev expansions, errors vs propagation time and errors vs number of Brillouin zones 
